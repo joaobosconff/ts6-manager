@@ -1,0 +1,37 @@
+version: "3.8"
+
+# One container: UI (nginx :80) + API (:3001) + sidecar (:9800).
+
+services:
+  ts6:
+    build:
+      context: .
+      dockerfile: Dockerfile.all-in-one
+    image: clusterzx/ts6-manager:all-in-one
+    container_name: ts6-all-in-one
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=file:/app/packages/backend/data/ts6webui.db
+      - JWT_SECRET=${JWT_SECRET:-change-this-to-a-random-string-at-least-32-chars}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
+      - TS_ALLOW_SELF_SIGNED=${TS_ALLOW_SELF_SIGNED:-false}
+      - YT_COOKIE_FILE=${YT_COOKIE_FILE:-}
+      - JWT_ACCESS_EXPIRY=15m
+      - JWT_REFRESH_EXPIRY=7d
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - MUSIC_DIR=/data/music
+      - SIDECAR_URL=http://127.0.0.1:9800
+      - SIDECAR_PORT=9800
+    volumes:
+      - backend-data:/app/packages/backend/data
+      - music-data:/data/music
+    ports:
+      - "${HOST_PORT:-3000}:80"
+
+volumes:
+  backend-data:
+    driver: local
+  music-data:
+    driver: local
