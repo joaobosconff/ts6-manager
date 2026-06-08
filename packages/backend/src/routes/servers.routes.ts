@@ -133,6 +133,9 @@ serverRoutes.post('/:configId/test', requireRole('admin'), async (req: Request, 
     const ok = await client.testConnection();
     client.destroy(); // Close the temporary TCP connection immediately
 
-    res.json({ success: ok });
+    if (!ok) {
+      return res.status(400).json({ success: false, error: 'Connection test failed' });
+    }
+    res.json({ success: true });
   } catch (err) { next(err); }
 });
